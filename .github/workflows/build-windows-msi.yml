@@ -1,0 +1,35 @@
+name: Construir instalador Windows MSI
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build-windows-msi:
+    runs-on: windows-latest
+
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Instalar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Instalar Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Instalar dependencias
+        run: npm install
+
+      - name: Construir MSI
+        run: npm run tauri build -- --bundles msi
+
+      - name: Subir instalador MSI como artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: PremiumPlus-Billar-MSI
+          path: src-tauri/target/release/bundle/msi/*.msi
