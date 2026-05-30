@@ -1,0 +1,20 @@
+[package]
+name = "premiumplus_billar"
+version = "1.0.1"
+description = "Billar tres bandas"
+authors = ["Juan José Arango E."]
+license = ""
+repository = ""
+edition = "2021"
+rust-version = "1.77.2"
+
+[lib]
+name = "premiumplus_billar_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-opener = "2"

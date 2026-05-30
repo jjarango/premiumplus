@@ -1,0 +1,13 @@
+{
+  "name": "premiumplus-billar",
+  "version": "1.0.1",
+  "private": true,
+  "description": "Billar tres bandas | Juan Jose Arango E.",
+  "scripts": {
+    "tauri": "tauri",
+    "build": "node -e \"console.log('Aplicacion HTML estatica: no requiere build de frontend')\""
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.0.0"
+  }
+}

@@ -1,0 +1,1796 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Billar tres bandas" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#2b4495" />
+  <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Asistente%20LKL%203%20Bandas%22%2C%22short_name%22%3A%22LKL%203B%22%2C%22start_url%22%3A%22.%22%2C%22scope%22%3A%22.%22%2C%22display%22%3A%22fullscreen%22%2C%22orientation%22%3A%22portrait%22%2C%22background_color%22%3A%22%23101217%22%2C%22theme_color%22%3A%22%232b4495%22%7D" />
+  <title>Billar tres bandas | JUAN JOSÉ ARANGO E. - Vueltas y Plus separados</title>
+  <style>
+    :root{
+      --bg:#101217;
+      --panel:#1b1f28;
+      --panel2:#232936;
+      --ink:#f4f2e8;
+      --muted:#b8b2a3;
+      --line:#d6b26d;
+      --line2:#62d7ff;
+      --warn:#ffbd59;
+      --bad:#ff6b6b;
+      --good:#75e39c;
+      --felt:#4170b3;
+      --rail:#2b4495;
+      --shadow:0 20px 50px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%; min-height:100%; margin:0}
+    body{
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:var(--bg);
+      color:var(--ink);
+      overflow-x:hidden;
+    }
+    header{padding:14px 18px 6px}
+    h1{font-size:clamp(20px,2.2vw,32px); margin:0; letter-spacing:-.02em}
+    .title-white{color:#ffffff}
+    .title-red{color:#ff1f1f}
+    .subtitle{color:#fff3b0; font-size:13px; margin-top:5px; max-width:980px; line-height:1.3}
+    .app{
+      display:grid;
+      grid-template-columns:minmax(560px, 1fr) 390px;
+      gap:16px;
+      padding:10px 18px 18px;
+      min-height:calc(100svh - 78px);
+    }
+    .stage,.panel{
+      background:linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.015));
+      border:1px solid rgba(255,255,255,.09);
+      border-radius:22px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .stage{display:flex; flex-direction:column; min-height:540px}
+    .canvasWrap{position:relative; flex:1; min-height:520px; touch-action:none}
+    canvas{width:100%; height:100%; display:block; cursor:grab; touch-action:none}
+    canvas:active{cursor:grabbing}
+    .loupeCanvas{
+      position:absolute;
+      width:264px;
+      height:264px;
+      border-radius:18px;
+      border:2px solid rgba(255,255,255,.82);
+      background:#101217;
+      box-shadow:0 18px 45px rgba(0,0,0,.48), 0 0 0 4px rgba(98,215,255,.18);
+      z-index:12;
+      pointer-events:none;
+      display:none;
+    }
+    .legend{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      padding:9px 14px 13px;
+      color:var(--muted);
+      font-size:12px;
+      border-top:1px solid rgba(255,255,255,.08);
+      background:rgba(0,0,0,.18);
+    }
+    .dot{width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:6px; vertical-align:-1px}
+    .panel{padding:14px; overflow:auto; max-height:calc(100svh - 98px)}
+    fieldset{border:1px solid rgba(255,255,255,.10); border-radius:16px; padding:12px; margin:0 0 14px; background:rgba(0,0,0,.12)}
+    legend{padding:0 6px; color:#f2d08d; font-weight:700; font-size:13px; letter-spacing:.02em}
+    label{display:block; font-size:13px; color:var(--muted); margin:10px 0 6px}
+    select,input[type="range"],input[type="number"],button{width:100%}
+    input.posCm{font-variant-numeric:tabular-nums; font-size:17px}
+    input.posCm::-webkit-outer-spin-button,input.posCm::-webkit-inner-spin-button{-webkit-appearance:none; margin:0}
+    select,input[type="number"],input[type="text"],button{
+      border:1px solid rgba(255,255,255,.12);
+      background:var(--panel2);
+      color:var(--ink);
+      border-radius:12px;
+      padding:10px 11px;
+      font-size:14px;
+      outline:none;
+    }
+    select:focus,input[type="number"]:focus,input[type="text"]:focus,button:focus{border-color:#e5c27d; box-shadow:0 0 0 3px rgba(229,194,125,.14)}
+    input[type="range"]{accent-color:#e7bd6a}
+    input[type="range"]:disabled{opacity:.35}
+    .ballBox{border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:10px; margin:10px 0; background:rgba(255,255,255,.035)}
+    .ballBox h3{font-size:14px; margin:0 0 8px; color:#fff}
+    .cmrow{display:grid; grid-template-columns:1fr 1.15fr; gap:8px; align-items:end}
+    .diagBox{border-radius:16px; padding:12px; background:rgba(98,215,255,.08); border:1px solid rgba(98,215,255,.22); font-size:13px; line-height:1.35}
+    .diagBox b{color:#fff}
+    .row{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+    .btns{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+    button{cursor:pointer; font-weight:700; background:linear-gradient(180deg,#354053,#252c3b)}
+    button.primary{background:linear-gradient(180deg,#d5a44d,#9b6827); color:#16110a}
+    button:hover{filter:brightness(1.08)}
+    .pill{display:inline-block; border-radius:999px; padding:3px 8px; background:rgba(255,255,255,.09); color:#fff; font-size:12px; margin:2px 3px 2px 0; white-space:nowrap}
+    .warn{color:var(--warn)} .bad{color:var(--bad)} .good{color:var(--good)}
+    .small{font-size:12px; color:var(--muted); line-height:1.35}
+    .mono{font-variant-numeric:tabular-nums; font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace}
+    details{margin-top:12px}
+    summary{cursor:pointer; color:#f2d08d; font-weight:700; font-size:13px}
+
+    @media(max-width:980px){
+      header{padding:10px 10px 4px}
+      h1{font-size:18px}
+      .subtitle{font-size:12px; line-height:1.2}
+      .app{display:block; padding:6px 8px 14px; min-height:auto}
+      .stage{width:100%; min-height:0; border-radius:18px}
+      .canvasWrap{height:56svh; min-height:360px}
+      .legend{padding:6px 10px; font-size:11px}
+      .panel{margin-top:10px; max-height:none; border-radius:18px}
+    }
+
+    @media(max-width:1200px) and (orientation:landscape){
+      header{display:none}
+      .app{display:block; padding:0; min-height:100svh}
+      .stage{height:100svh; min-height:100svh; width:100%; border:0; border-radius:0; box-shadow:none}
+      .canvasWrap{height:calc(100svh - 34px); min-height:0}
+      .legend{height:34px; padding:5px 9px; font-size:10px; overflow:hidden}
+      .panel{margin:10px 8px 16px; max-height:none; border-radius:18px}
+      .loupeCanvas{width:min(264px, 28.5vw); height:min(264px, 28.5vw)}
+    }
+
+    @media all and (display-mode: standalone){
+      html,body{height:100svh; overflow:auto; background:var(--bg)}
+      header{display:none}
+      .app{padding:env(safe-area-inset-top) 6px 10px; min-height:100svh}
+      .stage{border-radius:18px}
+    }
+
+    html.standalone-mode body{
+      background:var(--bg);
+    }
+    html.standalone-mode header{
+      display:none;
+    }
+    html.standalone-mode .app{
+      padding:env(safe-area-inset-top) 6px 10px;
+      min-height:100svh;
+    }
+    html.standalone-mode .stage{
+      border-radius:18px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1><span class="title-white">Billar tres bandas | </span><span class="title-red">JUAN JOSÉ ARANGO E.</span></h1>
+      <div class="subtitle">Posicione las bolas, elija la secuencia y ajuste el efecto y el tipo de golpe.</div>
+    </div>
+  </header>
+
+  <main class="app">
+    <section class="stage">
+      <div class="canvasWrap" id="canvasWrap">
+        <canvas id="table"></canvas>
+        <canvas id="loupe" class="loupeCanvas" width="528" height="528" aria-hidden="true"></canvas>
+      </div>
+      <div class="legend">
+        <span><i class="dot" style="background:#f8f4e6"></i>Blanca</span>
+        <span><i class="dot" style="background:#ffd23f"></i>Amarilla</span>
+        <span><i class="dot" style="background:#db3832"></i>Roja</span>
+        <span><i class="dot" style="background:var(--line2)"></i>Ruta</span>
+        <span><i class="dot" style="background:#fff200"></i>Ataque</span>
+        <span><i class="dot" style="background:rgba(255,255,255,.75)"></i>Marcas</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <fieldset>
+        <legend>Marcas y líneas de referencia</legend>
+        <label for="showMarks">Visualización</label>
+        <select id="showMarks">
+          <option value="show">Ver marcas y líneas</option>
+          <option value="hide">Ocultar marcas y líneas</option>
+        </select>
+
+        <label for="systemMode">Sistema de cálculo</label>
+        <select id="systemMode">
+          <option value="lkl" selected>LKL / Base 50</option>
+          <option value="clc">Corta-larga-corta</option>
+          <option value="long">Vueltas largas</option>
+          <option value="plus">Plus</option>
+        </select>
+        <p class="small" id="systemHelp">En LKL la app conserva el comportamiento actual. Corta-larga-corta, Vueltas largas y Plus usan módulos separados.</p>
+      </fieldset>
+
+      <fieldset>
+        <legend>0. Ubicación precisa de las bolas</legend>
+        <p class="small">Puede arrastrar las bolas o escribir directamente las distancias en centímetros. Use punto o coma decimal. La bola se mueve mientras escribe. Mesa patrón: 284 × 142 cm. Al iniciar, las bolas quedan en la salida UMB por la izquierda. Se muestran líneas de referencia tenues sobre el paño, incluyendo las tres horizontales alineadas con los puntos guía centrales.</p>
+
+        <div class="ballBox">
+          <h3>Blanca tacadora</h3>
+          <div class="cmrow">
+            <div>
+              <label for="whiteLongCm">Distancia a banda larga</label>
+              <input id="whiteLongCm" class="posCm" data-ball="white" data-axis="long" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="cm" />
+            </div>
+            <div>
+              <label for="whiteLongRef">Banda larga</label>
+              <select id="whiteLongRef" class="posRef" data-ball="white" data-axis="long">
+                <option value="top">Superior</option>
+                <option value="bottom" selected>Inferior</option>
+              </select>
+            </div>
+          </div>
+          <div class="cmrow">
+            <div>
+              <label for="whiteShortCm">Distancia a banda corta</label>
+              <input id="whiteShortCm" class="posCm" data-ball="white" data-axis="short" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="cm" />
+            </div>
+            <div>
+              <label for="whiteShortRef">Banda corta</label>
+              <select id="whiteShortRef" class="posRef" data-ball="white" data-axis="short">
+                <option value="left" selected>Izquierda</option>
+                <option value="right">Derecha</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="ballBox">
+          <h3>Amarilla</h3>
+          <div class="cmrow">
+            <div>
+              <label for="yellowLongCm">Distancia a banda larga</label>
+              <input id="yellowLongCm" class="posCm" data-ball="yellow" data-axis="long" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="cm" />
+            </div>
+            <div>
+              <label for="yellowLongRef">Banda larga</label>
+              <select id="yellowLongRef" class="posRef" data-ball="yellow" data-axis="long">
+                <option value="top" selected>Superior</option>
+                <option value="bottom">Inferior</option>
+              </select>
+            </div>
+          </div>
+          <div class="cmrow">
+            <div>
+              <label for="yellowShortCm">Distancia a banda corta</label>
+              <input id="yellowShortCm" class="posCm" data-ball="yellow" data-axis="short" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="cm" />
+            </div>
+            <div>
+              <label for="yellowShortRef">Banda corta</label>
+              <select id="yellowShortRef" class="posRef" data-ball="yellow" data-axis="short">
+                <option value="left" selected>Izquierda</option>
+                <option value="right">Derecha</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="ballBox">
+          <h3>Roja</h3>
+          <div class="cmrow">
+            <div>
+              <label for="redLongCm">Distancia a banda larga</label>
+              <input id="redLongCm" class="posCm" data-ball="red" data-axis="long" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="cm" />
+            </div>
+            <div>
+              <label for="redLongRef">Banda larga</label>
+              <select id="redLongRef" class="posRef" data-ball="red" data-axis="long">
+                <option value="top" selected>Superior</option>
+                <option value="bottom">Inferior</option>
+              </select>
+            </div>
+          </div>
+          <div class="cmrow">
+            <div>
+              <label for="redShortCm">Distancia a banda corta</label>
+              <input id="redShortCm" class="posCm" data-ball="red" data-axis="short" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" placeholder="cm" />
+            </div>
+            <div>
+              <label for="redShortRef">Banda corta</label>
+              <select id="redShortRef" class="posRef" data-ball="red" data-axis="short">
+                <option value="left">Izquierda</option>
+                <option value="right" selected>Derecha</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>1. Secuencia de la jugada</legend>
+        <label for="mode">Salida de la blanca</label>
+        <select id="mode">
+          <option value="ballFirst">Bola primero, luego bandas</option>
+          <option value="cushionFirst">Banda previa, luego bola</option>
+        </select>
+
+        <label id="firstBallLabel" for="firstBall">Primera bola</label>
+        <select id="firstBall">
+          <option value="yellow">Amarilla</option>
+          <option value="red" selected>Roja</option>
+        </select>
+
+        <div class="row">
+          <div>
+            <label for="rail1">Primera banda</label>
+            <select id="rail1">
+              <option value="bottom">Larga inferior</option>
+              <option value="right">Corta derecha</option>
+              <option value="top" selected>Larga superior</option>
+              <option value="left">Corta izquierda</option>
+            </select>
+          </div>
+          <div>
+            <label for="rail2">Segunda banda</label>
+            <select id="rail2">
+              <option value="right" selected>Corta derecha</option>
+              <option value="top">Larga superior</option>
+              <option value="left">Corta izquierda</option>
+              <option value="bottom">Larga inferior</option>
+            </select>
+          </div>
+        </div>
+
+        <label for="thirdRail">Tercera banda opcional</label>
+        <select id="thirdRail">
+          <option value="auto">Automática</option>
+          <option value="none">No fijarla</option>
+          <option value="top">Larga superior</option>
+          <option value="right">Corta derecha</option>
+          <option value="bottom" selected>Larga inferior</option>
+          <option value="left">Corta izquierda</option>
+        </select>
+
+        <label for="fourthRail">Cuarta banda opcional</label>
+        <select id="fourthRail">
+          <option value="none">Sin cuarta banda</option>
+          <option value="top">Larga superior</option>
+          <option value="right">Corta derecha</option>
+          <option value="bottom">Larga inferior</option>
+          <option value="left">Corta izquierda</option>
+        </select>
+
+        <div id="longRailsExtra" style="display:none">
+          <label for="fifthRail">Quinta banda opcional</label>
+          <select id="fifthRail">
+            <option value="none" selected>Sin quinta banda</option>
+            <option value="top">Larga superior</option>
+            <option value="right">Corta derecha</option>
+            <option value="bottom">Larga inferior</option>
+            <option value="left">Corta izquierda</option>
+          </select>
+
+          <label for="sixthRail">Sexta banda opcional</label>
+          <select id="sixthRail">
+            <option value="none" selected>Sin sexta banda</option>
+            <option value="top">Larga superior</option>
+            <option value="right">Corta derecha</option>
+            <option value="bottom">Larga inferior</option>
+            <option value="left">Corta izquierda</option>
+          </select>
+        </div>
+
+        <p class="small" id="sequenceHelp">La cuarta banda, si se selecciona, entra en el cálculo completo del ataque.</p>
+      </fieldset>
+
+      <fieldset>
+        <legend>2. Efecto y golpe</legend>
+        <label for="english">Dirección del efecto</label>
+        <select id="english">
+          <option value="positive">Positivo: abre / alarga</option>
+          <option value="neutral">Sin efecto lateral</option>
+          <option value="negative">Negativo: cierra / acorta</option>
+        </select>
+        <label for="tips">Efecto lateral <span class="value" id="tipsVal">Efecto 2 = 1.0 punta = 12.0 mm</span></label>
+        <input id="tips" type="range" min="0" max="4" step="1" value="2" />
+        <label for="tipMm">Diámetro real de una punta <span class="value" id="tipMmVal">12.0 mm</span></label>
+        <input id="tipMm" type="range" min="8" max="14" step="0.5" value="12" />
+        <label for="stroke">Tipo de golpe</label>
+        <select id="stroke">
+          <option value="long">Penetrado largo</option>
+          <option value="short">Penetrado corto</option>
+          <option value="dry">Seco</option>
+        </select>
+      </fieldset>
+
+      <fieldset>
+        <legend>Diagnóstico del cálculo</legend>
+        <div id="diagnostic" class="diagBox">Pendiente de cálculo.</div>
+      </fieldset>
+      <div class="btns" style="margin-top:14px">
+        <button class="primary" id="recalc">Recalcular</button>
+        <button id="reset">Reiniciar bolas</button>
+      </div>
+    </aside>
+  </main>
+
+<script>
+(() => {
+  const isStandalone = () =>
+    (window.navigator.standalone === true) ||
+    window.matchMedia('(display-mode: standalone)').matches ||
+    window.matchMedia('(display-mode: fullscreen)').matches;
+
+  function prepareIpadView(){
+    if(isStandalone()){
+      document.documentElement.classList.add('standalone-mode');
+    } else {
+      // Safari normal no permite eliminar programáticamente la barra del navegador.
+      // Este pequeño desplazamiento solo intenta reducirla cuando iPadOS lo permite.
+      setTimeout(() => window.scrollTo(0, 1), 150);
+    }
+  }
+  prepareIpadView();
+  window.addEventListener('pageshow', prepareIpadView);
+  window.addEventListener('orientationchange', () => setTimeout(prepareIpadView, 250));
+
+  const canvas = document.getElementById('table');
+  const ctx = canvas.getContext('2d');
+  const loupe = document.getElementById('loupe');
+  const lctx = loupe.getContext('2d');
+  const ids = id => document.getElementById(id);
+
+  const TABLE = { W:80, H:40 };
+  const TABLE_CM = { W:284, H:142 };
+  const BALL_R = 1.08;
+  const rails = ['top','right','bottom','left'];
+  const railNames = { top:'larga superior', right:'corta derecha', bottom:'larga inferior', left:'corta izquierda' };
+  const ballNames = { white:'blanca', yellow:'amarilla', red:'roja' };
+  const colors = { white:'#f8f4e6', yellow:'#ffd23f', red:'#db3832' };
+  const START_MARKS = [
+    {x:20,y:14.788732}, {x:40,y:14.788732}, {x:60,y:14.788732},
+    {x:20,y:20.000000}, {x:40,y:20.000000}, {x:60,y:20.000000},
+    {x:20,y:25.211268}, {x:40,y:25.211268}, {x:60,y:25.211268}
+  ];
+
+  let balls = { white:{x:20, y:25}, yellow:{x:20, y:20}, red:{x:60, y:20} };
+  const initialBalls = JSON.parse(JSON.stringify(balls));
+  let dragKey = null;
+  let geom = { scale:1, ox:0, oy:0, w:0, h:0, dpr:1 };
+  let currentShot = null;
+  let loupeRenderMode = false;
+  let syncingPositionInputs = false;
+
+  function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+  function dist(a,b){ return Math.hypot(a.x-b.x, a.y-b.y); }
+  function sub(a,b){ return {x:a.x-b.x, y:a.y-b.y}; }
+  function add(a,b){ return {x:a.x+b.x, y:a.y+b.y}; }
+  function mul(v,k){ return {x:v.x*k, y:v.y*k}; }
+  function len(v){ return Math.hypot(v.x,v.y); }
+  function norm(v){ const l=len(v)||1; return {x:v.x/l, y:v.y/l}; }
+  function dot(a,b){ return a.x*b.x+a.y*b.y; }
+  function cross(a,b){ return a.x*b.y-a.y*b.x; }
+  function signedAngle(a,b){ return Math.atan2(cross(a,b), dot(a,b)); }
+  function fmt(n,d=1){ return Number.isFinite(n) ? n.toFixed(d) : '—'; }
+  function zoneKey(p){ return `${Math.round(p.x/10)*10},${Math.round(p.y/10)*10}`; }
+  function makeLearningKey(c, path, start, target, effectLevel){
+    const third = path.seq[2] || 'none';
+    const fourth = path.seq[3] || 'none';
+    return [c.mode, c.firstBall, c.rail1, c.rail2, third, fourth, c.english, effectLevel, c.stroke, zoneKey(start), zoneKey(target)].join('|');
+  }
+
+  function resize(){
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.max(600, Math.floor(rect.width*dpr));
+    canvas.height = Math.max(320, Math.floor(rect.height*dpr));
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    geom = { dpr, w:rect.width, h:rect.height, scale:1, ox:0, oy:0 };
+    const pad = Math.max(18, Math.min(rect.width, rect.height)*0.055);
+    geom.scale = Math.min((rect.width - pad*2)/TABLE.W, (rect.height - pad*2)/TABLE.H);
+    geom.ox = (rect.width - TABLE.W*geom.scale)/2;
+    geom.oy = (rect.height - TABLE.H*geom.scale)/2;
+    draw();
+  }
+  new ResizeObserver(resize).observe(canvas.parentElement);
+  window.addEventListener('orientationchange', () => setTimeout(resize, 220));
+  window.addEventListener('resize', () => setTimeout(resize, 80));
+
+  function worldToScreen(p){ return {x:geom.ox + p.x*geom.scale, y:geom.oy + p.y*geom.scale}; }
+  function screenToWorld(x,y){ return {x:(x-geom.ox)/geom.scale, y:(y-geom.oy)/geom.scale}; }
+  function reflectPoint(p, rail){
+    if(rail==='top') return {x:p.x, y:-p.y};
+    if(rail==='bottom') return {x:p.x, y:2*TABLE.H-p.y};
+    if(rail==='left') return {x:-p.x, y:p.y};
+    if(rail==='right') return {x:2*TABLE.W-p.x, y:p.y};
+    return {...p};
+  }
+  function reflectDir(v, rail){
+    if(rail==='top' || rail==='bottom') return {x:v.x, y:-v.y};
+    if(rail==='left' || rail==='right') return {x:-v.x, y:v.y};
+    return {...v};
+  }
+  function rayBoundary(p,d){
+    const EPS = 1e-8, hits = [];
+    if(d.x > EPS) hits.push({t:(TABLE.W-p.x)/d.x, rail:'right'});
+    if(d.x < -EPS) hits.push({t:(0-p.x)/d.x, rail:'left'});
+    if(d.y > EPS) hits.push({t:(TABLE.H-p.y)/d.y, rail:'bottom'});
+    if(d.y < -EPS) hits.push({t:(0-p.y)/d.y, rail:'top'});
+    let best = null;
+    for(const h of hits){
+      if(h.t <= 1e-6) continue;
+      const q = {x:p.x + d.x*h.t, y:p.y + d.y*h.t};
+      if(q.x < -1e-5 || q.x > TABLE.W+1e-5 || q.y < -1e-5 || q.y > TABLE.H+1e-5) continue;
+      if(!best || h.t < best.t) best = {...h, point:{x:clamp(q.x,0,TABLE.W), y:clamp(q.y,0,TABLE.H)}};
+    }
+    return best;
+  }
+
+  function mirrorPath(start,target,seq){
+    let virtual = {...target};
+    for(let i=seq.length-1; i>=0; i--) virtual = reflectPoint(virtual, seq[i]);
+    const dir0 = norm(sub(virtual, start));
+    let p = {...start}, dir = {...dir0};
+    const points = [{...start}], hitRails = [], mismatches = [];
+    let valid = true, length = 0;
+    for(let i=0; i<seq.length; i++){
+      const hit = rayBoundary(p, dir);
+      if(!hit){ valid = false; mismatches.push(`no encontró ${railNames[seq[i]]}`); break; }
+      points.push(hit.point); length += dist(p, hit.point); hitRails.push(hit.rail);
+      if(hit.rail !== seq[i]){ valid = false; mismatches.push(`esperaba ${railNames[seq[i]]}, pero llega primero a ${railNames[hit.rail]}`); }
+      dir = reflectDir(dir, hit.rail); p = add(hit.point, mul(dir, 1e-5));
+    }
+    points.push({...target}); length += dist(points[points.length-2], target);
+    return {valid, points, attack:points[1], virtual, hitRails, mismatches, length, seq};
+  }
+
+  function railCoord(p, rail){ return (rail==='top' || rail==='bottom') ? p.x : p.y; }
+  function shiftAttack(p, rail, points){
+    if(!p) return null;
+    return (rail==='top' || rail==='bottom') ? {x:clamp(p.x+points,0.1,TABLE.W-0.1), y:p.y} : {x:p.x, y:clamp(p.y+points,0.1,TABLE.H-0.1)};
+  }
+  function controls(){
+    return {
+      systemMode:ids('systemMode').value,
+      mode:ids('mode').value, firstBall:ids('firstBall').value, rail1:ids('rail1').value, rail2:ids('rail2').value,
+      thirdRail:ids('thirdRail').value, fourthRail:ids('fourthRail').value,
+      fifthRail:ids('fifthRail') ? ids('fifthRail').value : 'none',
+      sixthRail:ids('sixthRail') ? ids('sixthRail').value : 'none',
+      english:ids('english').value,
+      tips:parseFloat(ids('tips').value), tipMm:parseFloat(ids('tipMm').value), stroke:ids('stroke').value
+    };
+  }
+  function strokeDelta(stroke){ return stroke==='long' ? 1 : (stroke==='short' ? -0.65 : -0.15); }
+  function strokeText(stroke){ return stroke==='long' ? 'penetrado largo' : (stroke==='short' ? 'penetrado corto' : 'seco'); }
+  function englishSign(english){ return english==='positive' ? 1 : (english==='negative' ? -1 : 0); }
+  function englishText(english){ return english==='positive' ? 'positivo, abre/alarga' : (english==='negative' ? 'negativo, cierra/acorta' : 'sin efecto lateral'); }
+  function choosePath(start,target,c){
+    const baseSeq = [c.rail1,c.rail2];
+    let possibleThirds;
+    if((c.fourthRail !== 'none' && c.thirdRail === 'none') || c.thirdRail === 'auto') possibleThirds = rails;
+    else if(c.thirdRail === 'none') possibleThirds = [null];
+    else possibleThirds = [c.thirdRail];
+    const candidates = possibleThirds.map(r3 => {
+      const seq = [...baseSeq]; if(r3) seq.push(r3); if(c.fourthRail !== 'none') seq.push(c.fourthRail);
+      const path = mirrorPath(start,target,seq);
+      const repeatedPenalty = (r3 && r3===c.rail2 ? 8 : 0) + (c.fourthRail !== 'none' && r3===c.fourthRail ? 8 : 0);
+      const cornerPenalty = path.points.some(p => (p.x<1 || p.x>TABLE.W-1) && (p.y<1 || p.y>TABLE.H-1)) ? 12 : 0;
+      return {path, score:(path.valid?0:1000) + path.length*0.02 + repeatedPenalty + cornerPenalty};
+    });
+    candidates.sort((a,b)=>a.score-b.score);
+    return candidates[0].path;
+  }
+  function classifyCut(angleDeg){
+    const a = Math.abs(angleDeg);
+    if(a < 15) return 'muy llena'; if(a < 32) return 'llena a 3/4'; if(a < 52) return 'media bola aproximada'; if(a < 72) return 'fina, cerca de 1/4'; if(a < 95) return 'muy fina o forzada'; return 'extrema: probablemente no natural';
+  }
+
+  function clampBallToTable(p){
+    return { x: clamp(p.x, BALL_R, TABLE.W - BALL_R), y: clamp(p.y, BALL_R, TABLE.H - BALL_R) };
+  }
+
+  function worldToCm(p, longRef, shortRef){
+    const longCm = longRef === 'top'
+      ? (p.y / TABLE.H) * TABLE_CM.H
+      : ((TABLE.H - p.y) / TABLE.H) * TABLE_CM.H;
+    const shortCm = shortRef === 'left'
+      ? (p.x / TABLE.W) * TABLE_CM.W
+      : ((TABLE.W - p.x) / TABLE.W) * TABLE_CM.W;
+    return { longCm, shortCm };
+  }
+
+  function cmToWorld(longCm, longRef, shortCm, shortRef){
+    let y = (longCm / TABLE_CM.H) * TABLE.H;
+    if(longRef === 'bottom') y = TABLE.H - y;
+    let x = (shortCm / TABLE_CM.W) * TABLE.W;
+    if(shortRef === 'right') x = TABLE.W - x;
+    return clampBallToTable({x,y});
+  }
+
+  function parseCmInput(value){
+    if(typeof value !== 'string') return NaN;
+    const cleaned = value.trim().replace(',', '.');
+    if(cleaned === '') return NaN;
+    return parseFloat(cleaned);
+  }
+
+  function updatePositionInputs(){
+    syncingPositionInputs = true;
+    const active = document.activeElement;
+    for(const key of ['white','yellow','red']){
+      const longRef = ids(`${key}LongRef`).value;
+      const shortRef = ids(`${key}ShortRef`).value;
+      const cm = worldToCm(balls[key], longRef, shortRef);
+      const longInput = ids(`${key}LongCm`);
+      const shortInput = ids(`${key}ShortCm`);
+
+      // No sobrescriba el campo que el usuario está editando en ese instante.
+      if(active !== longInput) longInput.value = fmt(cm.longCm,1);
+      if(active !== shortInput) shortInput.value = fmt(cm.shortCm,1);
+    }
+    syncingPositionInputs = false;
+  }
+
+  function updateBallFromCmInputs(key){
+    if(syncingPositionInputs) return;
+
+    const longRef = ids(`${key}LongRef`).value;
+    const shortRef = ids(`${key}ShortRef`).value;
+    const current = worldToCm(balls[key], longRef, shortRef);
+
+    const longRaw = ids(`${key}LongCm`).value;
+    const shortRaw = ids(`${key}ShortCm`).value;
+    const longCm = parseCmInput(longRaw);
+    const shortCm = parseCmInput(shortRaw);
+
+    // Si ambos campos están vacíos o inválidos, no mueva la bola.
+    if(!Number.isFinite(longCm) && !Number.isFinite(shortCm)) return;
+
+    const p = cmToWorld(
+      Number.isFinite(longCm) ? clamp(longCm, 0, TABLE_CM.H) : current.longCm,
+      longRef,
+      Number.isFinite(shortCm) ? clamp(shortCm, 0, TABLE_CM.W) : current.shortCm,
+      shortRef
+    );
+
+    balls[key] = p;
+    draw();
+  }
+
+  function railType(r){ return (r === 'top' || r === 'bottom') ? 'larga' : 'corta'; }
+  function railTypeShort(r){ return (r === 'top' || r === 'bottom') ? 'L' : 'C'; }
+  function sequenceFamily(seq){ return seq.map(railTypeShort).join('-'); }
+
+  function zoneByValue(v, max){
+    const t = v / max;
+    if(t < .33) return 'baja';
+    if(t < .66) return 'media';
+    return 'alta';
+  }
+
+  function zonePoint(p){
+    return `${zoneByValue(p.y,TABLE.H)}-${zoneByValue(p.x,TABLE.W)}`;
+  }
+
+  function angleToFirstRail(start, attack, rail){
+    if(!attack) return 0;
+    const v = norm(sub(attack, start));
+    const tangent = (rail === 'top' || rail === 'bottom') ? {x:1,y:0} : {x:0,y:1};
+    return Math.acos(clamp(Math.abs(dot(v,tangent)), -1, 1)) * 180 / Math.PI;
+  }
+
+  function angleClass(a){
+    if(a < 22) return 'entrada cerrada';
+    if(a < 42) return 'entrada media';
+    return 'entrada abierta';
+  }
+
+  function proximityWeight(p, center, radius){
+    const d = dist(p, center);
+    return clamp(1 - d / radius, 0, 1);
+  }
+
+  function standardBreakAnchor(c, path, rawAttack, modelTotal){
+    // Tiro ancla: carambola normal de salida.
+    // Referencia práctica suministrada: con bola roja primero, secuencia
+    // larga superior → corta derecha → larga inferior, efecto positivo 2
+    // y golpe penetrado largo, el ataque conocido es aproximadamente 75.
+    if(c.mode !== 'ballFirst') return null;
+    if(c.firstBall !== 'red') return null;
+    if(c.rail1 !== 'top' || c.rail2 !== 'right') return null;
+    if(path.seq[2] !== 'bottom') return null;
+    if(c.fourthRail !== 'none') return null;
+    if(c.english !== 'positive') return null;
+    if(c.stroke !== 'long') return null;
+    if(Number(c.tips) !== 2) return null;
+    if(!rawAttack) return null;
+
+    const wWhite = proximityWeight(balls.white, {x:20, y:25}, 10);
+    const wYellow = proximityWeight(balls.yellow, {x:20, y:20}, 10);
+    const wRed = proximityWeight(balls.red, {x:60, y:20}, 12);
+    const weight = Math.min(wWhite, wYellow, wRed);
+
+    if(weight <= 0) return null;
+
+    const targetAttack = 75.0;
+    const predictedAttack = railCoord(shiftAttack(rawAttack, c.rail1, modelTotal), c.rail1);
+    const delta = (targetAttack - predictedAttack) * weight;
+
+    return {
+      name: 'salida estándar',
+      targetAttack,
+      predictedAttack,
+      delta,
+      weight
+    };
+  }
+
+  function mirrorSign(c){
+    if(c.rail1 === 'top' || c.rail1 === 'bottom'){
+      if(c.rail2 === 'right') return -1;
+      if(c.rail2 === 'left') return 1;
+    } else {
+      if(c.rail2 === 'bottom') return -1;
+      if(c.rail2 === 'top') return 1;
+    }
+    return 1;
+  }
+
+  function conservativePremiumModel(c, path, start, target, rawAttack, effectLevel, effectiveTips){
+    const fam = sequenceFamily(path.seq);
+    const sign = mirrorSign(c);
+    const angle = angleToFirstRail(start, rawAttack, c.rail1);
+    const len = path.length || 0;
+
+    // Correcciones deliberadamente pequeñas: la geometría sigue siendo dominante.
+    const familyBase = {
+      'L-C': .25, 'C-L': .20,
+      'L-C-L': .85, 'C-L-C': .65,
+      'L-C-L-C': 1.15, 'C-L-C-L': .90,
+      'L-C-C': .45, 'C-L-L': .40,
+      'L-L': .15, 'C-C': .15
+    };
+    let familyPoints = sign * (familyBase[fam] ?? .55);
+    if(angle < 22) familyPoints *= .75;
+    if(angle > 42) familyPoints *= 1.15;
+    if(len > 105) familyPoints *= 1.12;
+
+    const effectGain = {
+      'L-C': .32, 'C-L': .28,
+      'L-C-L': .48, 'C-L-C': .42,
+      'L-C-L-C': .58, 'C-L-C-L': .50
+    }[fam] ?? .38;
+    const effectPoints = englishSign(c.english) * effectiveTips * effectGain;
+
+    const strokePoints = (c.stroke === 'long' ? .28 : (c.stroke === 'short' ? -.25 : -.08)) * (path.seq.length >= 4 ? 1.15 : 1);
+
+    // Cinturón de seguridad: ninguna corrección interna puede secuestrar el tiro.
+    const totalRaw = familyPoints + effectPoints + strokePoints;
+    const total = clamp(totalRaw, -4, 4);
+
+    const seqHuman = path.seq.map(r => railType(r)).join('-');
+    const effectHuman = c.english === 'neutral' ? 'neutro 0' : `${c.english === 'positive' ? 'positivo' : 'negativo'} ${effectLevel}`;
+
+    return {
+      familyKey:fam,
+      familyHuman:seqHuman,
+      startZone:zonePoint(start),
+      arrivalZone:zonePoint(target),
+      angle,
+      angleText:angleClass(angle),
+      familyPoints,
+      effectPoints,
+      strokePoints,
+      totalRaw,
+      total,
+      diagnosticText:`Familia detectada: ${seqHuman} / salida ${zonePoint(start)} / llegada ${zonePoint(target)} / ${angleClass(angle)} / efecto ${effectHuman} / golpe ${strokeText(c.stroke)}`
+    };
+  }
+
+  function rotate(v, radians){
+    const c = Math.cos(radians), s = Math.sin(radians);
+    return {x:v.x*c - v.y*s, y:v.x*s + v.y*c};
+  }
+
+  function railDistance(p, rail){
+    if(rail === 'top') return p.y;
+    if(rail === 'bottom') return TABLE.H - p.y;
+    if(rail === 'left') return p.x;
+    if(rail === 'right') return TABLE.W - p.x;
+    return 0;
+  }
+
+  function railTangentSign(rail, secondRail){
+    // Signo inicial para curvar la salida después de la primera banda.
+    // Es una convención geométrica prudente; el Renversé real depende mucho del taco.
+    if(rail === 'top' || rail === 'bottom'){
+      return secondRail === 'left' ? -1 : 1;
+    }
+    return secondRail === 'top' ? 1 : -1;
+  }
+
+  function renverseCorrectionModel(c, path, start, target, rawAttack, effectLevel, effectiveTips){
+    const angle = angleToFirstRail(start, rawAttack, c.rail1);
+    const distRail = railDistance(start, c.rail1);
+    const sign = englishSign(c.english) || 1;
+    const nearFactor = clamp(1 - distRail / 12, 0, 1);
+    const seqHuman = path.seq.map(r => railType(r)).join('-');
+    const effectHuman = c.english === 'neutral' ? 'neutro 0' : `${c.english === 'positive' ? 'positivo' : 'negativo'} ${effectLevel}`;
+
+    // En Renversé la corrección puede ser mayor que en LKL, pero se mantiene limitada
+    // para no destruir la figura. La cercanía a la banda y el efecto dominan.
+    const effectPoints = sign * effectiveTips * (1.65 + nearFactor * .85);
+    const anglePoints = angle < 18 ? sign * 1.15 : (angle > 42 ? -sign * .65 : 0);
+    const strokePoints = c.stroke === 'long' ? sign * .80 : (c.stroke === 'short' ? sign * .25 : -sign * .55);
+    const totalRaw = effectPoints + anglePoints + strokePoints;
+    const total = clamp(totalRaw, -9, 9);
+
+    return {
+      familyKey:'REN',
+      familyHuman:`Renversé ${seqHuman}`,
+      startZone:zonePoint(start),
+      arrivalZone:zonePoint(target),
+      angle,
+      angleText:angleClass(angle),
+      familyPoints:anglePoints,
+      effectPoints,
+      strokePoints,
+      totalRaw,
+      total,
+      anchor:null,
+      diagnosticText:`Familia detectada: Renversé / ${seqHuman} / salida ${zonePoint(start)} / llegada ${zonePoint(target)} / ${angleClass(angle)} / efecto ${effectHuman} / golpe ${strokeText(c.stroke)}`
+    };
+  }
+
+  function renverseVisualPathFromAttack(start, target, seq, attackPoint, c, effectiveTips){
+    if(!attackPoint || !seq || seq.length === 0) return null;
+
+    const points = [{...start}, {...attackPoint}];
+    let dir = reflectDir(norm(sub(attackPoint, start)), seq[0]);
+
+    // Giro adicional después del primer rebote: representa el dominio del efecto.
+    // No pretende ser una simulación física completa; es una guía visual de la familia Renversé.
+    const sign = (englishSign(c.english) || 1) * railTangentSign(seq[0], seq[1] || c.rail2);
+    const strokeAdj = c.stroke === 'long' ? 5 : (c.stroke === 'short' ? 1 : -3);
+    const turnDeg = clamp(10 + effectiveTips * 9 + strokeAdj, 4, 32);
+    dir = norm(rotate(dir, sign * turnDeg * Math.PI / 180));
+
+    let p = add(attackPoint, mul(dir, 1e-5));
+    let valid = true;
+
+    for(let i = 1; i < seq.length; i++){
+      const hit = rayBoundary(p, dir);
+      if(!hit){ valid = false; break; }
+      points.push(hit.point);
+      dir = reflectDir(dir, hit.rail);
+      p = add(hit.point, mul(dir, 1e-5));
+    }
+
+    points.push({...target});
+    return {points, valid};
+  }
+
+  function isShortRail(r){ return r === 'left' || r === 'right'; }
+  function isLongRail(r){ return r === 'top' || r === 'bottom'; }
+  function oppositeShort(r){ return r === 'left' ? 'right' : 'left'; }
+
+  function oppositeLong(r){ return r === 'top' ? 'bottom' : 'top'; }
+
+  function oppositeSameType(r){
+    if(r === 'left' || r === 'right') return oppositeShort(r);
+    return oppositeLong(r);
+  }
+
+  function defaultOppositeTypeRail(r){
+    // Si la primera banda es corta, la segunda debe ser larga; si es larga, la segunda debe ser corta.
+    if(r === 'left' || r === 'right') return 'top';
+    return 'right';
+  }
+
+  function updateSystemModeUi(c){
+    const isLong = c.systemMode === 'long';
+    const extra = ids('longRailsExtra');
+    if(extra) extra.style.display = isLong ? 'block' : 'none';
+
+    if(!isLong){
+      if(ids('fifthRail')) ids('fifthRail').value = 'none';
+      if(ids('sixthRail')) ids('sixthRail').value = 'none';
+    }
+
+    if(ids('systemHelp')){
+      ids('systemHelp').textContent =
+        c.systemMode === 'lkl'
+          ? 'LKL / Base 50 conserva el comportamiento general. Si fija tercera o cuarta banda, la app respeta esa secuencia.'
+          : (c.systemMode === 'clc'
+            ? 'Corta-larga-corta usa un módulo específico para esa familia.'
+            : (c.systemMode === 'long'
+              ? 'Vueltas largas usa un módulo separado y permite seleccionar hasta seis bandas.'
+              : 'Plus usa un módulo separado. Por definición, la primera banda efectiva debe ser una corta.'));
+    }
+
+    if(ids('sequenceHelp')){
+      ids('sequenceHelp').textContent =
+        c.systemMode === 'long'
+          ? 'En Vueltas largas puede seleccionar cuarta, quinta y sexta banda si realmente entran en la figura.'
+          : (c.systemMode === 'plus'
+            ? 'En Plus la primera banda efectiva debe ser una corta. La app usa una corrección interna propia para esta familia.'
+            : 'La cuarta banda, si se selecciona, entra en el cálculo completo del ataque.');
+    }
+  }
+
+  function buildForcedSeq(c){
+    const seq = [c.rail1, c.rail2];
+
+    if(c.thirdRail && c.thirdRail !== 'none' && c.thirdRail !== 'auto'){
+      seq.push(c.thirdRail);
+    }
+
+    const hasFourth = c.fourthRail && c.fourthRail !== 'none';
+    if(hasFourth){
+      seq.push(c.fourthRail);
+    }
+
+    // Solo Vueltas largas admite quinta y sexta banda.
+    if(c.systemMode === 'long' && hasFourth){
+      const hasFifth = c.fifthRail && c.fifthRail !== 'none';
+      if(hasFifth){
+        seq.push(c.fifthRail);
+        if(c.sixthRail && c.sixthRail !== 'none'){
+          seq.push(c.sixthRail);
+        }
+      }
+    }
+
+    return seq;
+  }
+
+  function enforceLongTourControls(c){
+    // Vueltas largas: por diseño, la primera banda efectiva debe ser una larga.
+    // Si el usuario viene de otra familia y quedó una corta seleccionada, se corrige.
+    if(!isLongRail(c.rail1)){
+      c.rail1 = 'bottom';
+      ids('rail1').value = c.rail1;
+    }
+    return c;
+  }
+
+  function enforcePlusControls(c){
+    // Plus: por definición operativa, la primera banda efectiva es una corta.
+    // Si el usuario viene de otra familia y quedó una larga seleccionada, se corrige.
+    if(!isShortRail(c.rail1)){
+      c.rail1 = 'right';
+      ids('rail1').value = c.rail1;
+    }
+    return c;
+  }
+
+  function enforceClcControls(c){
+    // En modo Corta-larga-corta, la secuencia debe ser corta → larga → corta.
+    // Se corrige suavemente la selección para evitar combinaciones imposibles.
+    if(!isShortRail(c.rail1)){
+      c.rail1 = 'right';
+      ids('rail1').value = c.rail1;
+    }
+    if(!isLongRail(c.rail2)){
+      c.rail2 = 'top';
+      ids('rail2').value = c.rail2;
+    }
+    if(!isShortRail(c.thirdRail) || c.thirdRail === 'auto' || c.thirdRail === 'none'){
+      c.thirdRail = oppositeShort(c.rail1);
+      ids('thirdRail').value = c.thirdRail;
+    }
+    c.fourthRail = 'none';
+    ids('fourthRail').value = 'none';
+    return c;
+  }
+
+  function clcCorrectionModel(c, path, start, target, rawAttack, effectLevel, effectiveTips){
+    const angle = angleToFirstRail(start, rawAttack, c.rail1);
+    const len = path.length || 0;
+    const seqHuman = path.seq.map(r => railType(r)).join('-');
+    const effectHuman = c.english === 'neutral'
+      ? 'neutro 0'
+      : `${c.english === 'positive' ? 'positivo' : 'negativo'} ${effectLevel}`;
+
+    // Modelo conservador específico para corta-larga-corta.
+    // La geometría sigue mandando; el módulo solo compensa por efecto, golpe y entrada.
+    const sign = mirrorSign(c);
+    let familyPoints = sign * .70;
+
+    if(angle < 18) familyPoints *= .65;
+    else if(angle > 42) familyPoints *= 1.25;
+
+    if(len > 95) familyPoints *= 1.15;
+    if(len < 55) familyPoints *= .80;
+
+    const effectGain = .46;
+    const effectPoints = englishSign(c.english) * effectiveTips * effectGain;
+
+    const strokePoints = c.stroke === 'long'
+      ? .35
+      : (c.stroke === 'short' ? -.30 : -.12);
+
+    const totalRaw = familyPoints + effectPoints + strokePoints;
+
+    // Seguridad: no permitir que el módulo CLC deforme la figura.
+    const total = clamp(totalRaw, -5, 5);
+
+    return {
+      familyKey:'C-L-C',
+      familyHuman:'corta-larga-corta',
+      startZone:zonePoint(start),
+      arrivalZone:zonePoint(target),
+      angle,
+      angleText:angleClass(angle),
+      familyPoints,
+      effectPoints,
+      strokePoints,
+      totalRaw,
+      total,
+      anchor:null,
+      diagnosticText:`Familia detectada: corta-larga-corta / ${seqHuman} / salida ${zonePoint(start)} / llegada ${zonePoint(target)} / ${angleClass(angle)} / efecto ${effectHuman} / golpe ${strokeText(c.stroke)}`
+    };
+  }
+
+  function longTourCorrectionModel(c, path, start, target, rawAttack, effectLevel, effectiveTips){
+    const angle = angleToFirstRail(start, rawAttack, c.rail1);
+    const len = path.length || 0;
+    const seqHuman = path.seq.map(r => railType(r)).join('-');
+    const effectHuman = c.english === 'neutral'
+      ? 'neutro 0'
+      : `${c.english === 'positive' ? 'positivo' : 'negativo'} ${effectLevel}`;
+
+    // Modelo conservador para vueltas largas con primera banda larga.
+    const sign = -mirrorSign(c);
+    let familyPoints = sign * .95;
+
+    if(angle < 18) familyPoints *= .70;
+    else if(angle > 42) familyPoints *= 1.15;
+
+    if(len > 165) familyPoints *= 1.35;
+    else if(len > 125) familyPoints *= 1.18;
+    else if(len < 85) familyPoints *= .85;
+
+    const effectGain = path.seq.length >= 5 ? .68 : .55;
+    const effectPoints = -englishSign(c.english) * effectiveTips * effectGain;
+
+    const strokePoints = c.stroke === 'long'
+      ? sign * .55
+      : (c.stroke === 'short' ? -sign * .30 : -sign * .10);
+
+    const totalRaw = familyPoints + effectPoints + strokePoints;
+    const total = clamp(totalRaw, -6.5, 6.5);
+
+    return {
+      familyKey:'LONG',
+      familyHuman:'vueltas largas',
+      startZone:zonePoint(start),
+      arrivalZone:zonePoint(target),
+      angle,
+      angleText:angleClass(angle),
+      familyPoints,
+      effectPoints,
+      strokePoints,
+      totalRaw,
+      total,
+      anchor:null,
+      diagnosticText:`Familia detectada: vueltas largas / ${seqHuman} / salida ${zonePoint(start)} / llegada ${zonePoint(target)} / ${angleClass(angle)} / efecto ${effectHuman} / golpe ${strokeText(c.stroke)}`
+    };
+  }
+
+  function plusCorrectionModel(c, path, start, target, rawAttack, effectLevel, effectiveTips){
+    const angle = angleToFirstRail(start, rawAttack, c.rail1);
+    const len = path.length || 0;
+    const seqHuman = path.seq.map(r => railType(r)).join('-');
+    const effectHuman = c.english === 'neutral'
+      ? 'neutro 0'
+      : `${c.english === 'positive' ? 'positivo' : 'negativo'} ${effectLevel}`;
+    const rawCoord = rawAttack ? railCoord(rawAttack, c.rail1) : NaN;
+
+    // Modelo específico para Plus: primera banda corta.
+    // Se permite una corrección más amplia que en Vueltas largas,
+    // porque el módulo anterior quedaba demasiado cerca de la geometría pura.
+    const shortSign = c.rail1 === 'right' ? 1 : -1;
+
+    let familyPoints = shortSign * 2.25;
+
+    if(angle < 18) familyPoints *= .80;
+    else if(angle > 42) familyPoints *= 1.20;
+
+    if(len > 145) familyPoints *= 1.18;
+    else if(len < 80) familyPoints *= .82;
+
+    const effectPoints = shortSign * englishSign(c.english) * effectiveTips * .85;
+
+    const strokePoints = c.stroke === 'long'
+      ? shortSign * .65
+      : (c.stroke === 'short' ? shortSign * .18 : -shortSign * .22);
+
+    // Tiro ancla interno de Plus: corta derecha → larga inferior → larga superior.
+    // Se incorporó porque en mesa real este subgrupo puede requerir ataques
+    // bastante más altos que los que daba el módulo combinado anterior.
+    let anchorPoints = 0;
+    if(
+      c.rail1 === 'right' &&
+      c.rail2 === 'bottom' &&
+      path.seq[2] === 'top' &&
+      Number.isFinite(rawCoord) &&
+      rawCoord < 35
+    ){
+      anchorPoints = (39.5 - rawCoord) * .82;
+    }
+
+    const totalRaw = familyPoints + effectPoints + strokePoints + anchorPoints;
+    const total = clamp(totalRaw, -16, 16);
+
+    return {
+      familyKey:'PLUS',
+      familyHuman:'plus',
+      startZone:zonePoint(start),
+      arrivalZone:zonePoint(target),
+      angle,
+      angleText:angleClass(angle),
+      familyPoints,
+      effectPoints,
+      strokePoints,
+      anchorPoints,
+      totalRaw,
+      total,
+      anchor:null,
+      diagnosticText:`Familia detectada: Plus / ${seqHuman} / primera banda corta / salida ${zonePoint(start)} / llegada ${zonePoint(target)} / ${angleClass(angle)} / efecto ${effectHuman} / golpe ${strokeText(c.stroke)}`
+    };
+  }
+
+
+  function foldCoord(v, max){
+    // Plegado tipo mesa extendida: si la geometría proyecta un punto por fuera
+    // del tramo visible de la banda, lo reingresa al tramo útil sin llevarlo
+    // artificialmente a una esquina. Esto mejora mucho las vueltas largas/Plus.
+    const period = max * 2;
+    let m = ((v % period) + period) % period;
+    return m <= max ? m : period - m;
+  }
+
+  function lineIntersectionWithRail(p, dir, rail){
+    const EPS = 1e-8;
+    let t = null;
+
+    if(rail === 'top'){
+      if(Math.abs(dir.y) < EPS) return null;
+      t = (0 - p.y) / dir.y;
+    } else if(rail === 'bottom'){
+      if(Math.abs(dir.y) < EPS) return null;
+      t = (TABLE.H - p.y) / dir.y;
+    } else if(rail === 'left'){
+      if(Math.abs(dir.x) < EPS) return null;
+      t = (0 - p.x) / dir.x;
+    } else if(rail === 'right'){
+      if(Math.abs(dir.x) < EPS) return null;
+      t = (TABLE.W - p.x) / dir.x;
+    }
+
+    if(t === null || !Number.isFinite(t) || t <= EPS) return null;
+
+    const q = {x:p.x + dir.x*t, y:p.y + dir.y*t};
+
+    if(rail === 'top' || rail === 'bottom'){
+      q.y = rail === 'top' ? 0 : TABLE.H;
+      q.x = foldCoord(q.x, TABLE.W);
+    } else {
+      q.x = rail === 'left' ? 0 : TABLE.W;
+      q.y = foldCoord(q.y, TABLE.H);
+    }
+    return q;
+  }
+
+  function forcedMirrorPath(start, target, seq){
+    let virtual = {...target};
+    for(let i = seq.length - 1; i >= 0; i--){
+      virtual = reflectPoint(virtual, seq[i]);
+    }
+
+    let dir = norm(sub(virtual, start));
+    let p = {...start};
+    const points = [{...start}];
+    let valid = true;
+    let length = 0;
+    const mismatches = [];
+    const hitRails = [];
+
+    for(const rail of seq){
+      let q = lineIntersectionWithRail(p, dir, rail);
+      if(!q){
+        const fallback = rayBoundary(p, dir);
+        if(!fallback){
+          valid = false;
+          mismatches.push(`no encontró ${railNames[rail]}`);
+          break;
+        }
+        q = fallback.point;
+        valid = false;
+        mismatches.push(`no pudo forzar ${railNames[rail]} con esta geometría`);
+      }
+
+      points.push(q);
+      hitRails.push(rail);
+      length += dist(p, q);
+      dir = reflectDir(dir, rail);
+      p = add(q, mul(dir, 1e-5));
+    }
+
+    points.push({...target});
+    length += dist(points[points.length - 2], target);
+
+    return {
+      valid,
+      points,
+      attack:points[1],
+      virtual,
+      hitRails,
+      mismatches,
+      length,
+      seq
+    };
+  }
+
+  function forcedVisualPathFromAttack(start, target, seq, attackPoint){
+    if(!attackPoint || !seq || seq.length === 0) return null;
+
+    const points = [{...start}, {...attackPoint}];
+    const remaining = seq.slice(1);
+
+    if(remaining.length === 0){
+      points.push({...target});
+      return {points, valid:true};
+    }
+
+    // Desde el ataque ya corregido, reconstruye visualmente la secuencia restante
+    // como restricción dura: segunda banda, tercera banda, etc.
+    // Esto es especialmente importante en corta-larga-corta.
+    let virtual = {...target};
+    for(let i = remaining.length - 1; i >= 0; i--){
+      virtual = reflectPoint(virtual, remaining[i]);
+    }
+
+    let p = {...attackPoint};
+    let dir = norm(sub(virtual, p));
+    let valid = true;
+
+    for(const rail of remaining){
+      let q = lineIntersectionWithRail(p, dir, rail);
+      if(!q){
+        const fallback = rayBoundary(p, dir);
+        if(!fallback){ valid = false; break; }
+        q = fallback.point;
+        valid = false;
+      }
+
+      points.push(q);
+      dir = reflectDir(dir, rail);
+      p = add(q, mul(dir, 1e-5));
+    }
+
+    points.push({...target});
+    return {points, valid};
+  }
+
+  function visualPathFromAttack(start, target, seq, attackPoint){
+    if(!attackPoint || !seq || seq.length === 0) return null;
+
+    const points = [{...start}, {...attackPoint}];
+
+    // The first segment is forced to end at the corrected attack point.
+    // From there, the remaining visual path is projected by simple cushion reflection.
+    let dir = reflectDir(norm(sub(attackPoint, start)), seq[0]);
+    let p = add(attackPoint, mul(dir, 1e-5));
+    let valid = true;
+
+    for(let i = 1; i < seq.length; i++){
+      const hit = rayBoundary(p, dir);
+      if(!hit){
+        valid = false;
+        break;
+      }
+      points.push(hit.point);
+      dir = reflectDir(dir, hit.rail);
+      p = add(hit.point, mul(dir, 1e-5));
+    }
+
+    points.push({...target});
+    return {points, valid};
+  }
+
+  function isStrictLklSequence(c){
+    // En LKL normal, si el usuario fija explícitamente la tercera banda
+    // o agrega cuarta banda, la app debe obedecer esa secuencia en cálculo y dibujo.
+    // Si la tercera está en "Automática", se conserva el comportamiento anterior.
+    return c.systemMode === 'lkl' && (
+      (c.thirdRail !== 'auto' && c.thirdRail !== 'none') ||
+      c.fourthRail !== 'none'
+    );
+  }
+
+  function sequenceCompatibilityWarning(start, seq, attackPoint){
+    if(!attackPoint || !seq || seq.length < 2) return null;
+
+    // Primera banda ya está impuesta por el ataque. Desde ahí miramos qué banda
+    // tocaría físicamente la bola si la dejáramos correr libremente.
+    let dir = reflectDir(norm(sub(attackPoint, start)), seq[0]);
+    let p = add(attackPoint, mul(dir, 1e-5));
+
+    for(let i = 1; i < seq.length; i++){
+      const hit = rayBoundary(p, dir);
+      if(!hit){
+        return `Con este ataque, la trayectoria no encuentra una continuación clara hacia ${railNames[seq[i]]}.`;
+      }
+
+      if(hit.rail !== seq[i]){
+        return `Con este ataque, la bola toca primero la ${railNames[hit.rail]} antes que la ${railNames[seq[i]]}.`;
+      }
+
+      dir = reflectDir(dir, hit.rail);
+      p = add(hit.point, mul(dir, 1e-5));
+    }
+
+    return null;
+  }
+
+  function computeShot(){
+    const c = controls();
+    if(c.systemMode === 'clc') enforceClcControls(c);
+    if(c.systemMode === 'long') enforceLongTourControls(c);
+    if(c.systemMode === 'plus') enforcePlusControls(c);
+    updateSystemModeUi(c);
+    const neutralEnglish = c.english === 'neutral';
+    const effectLevel = neutralEnglish ? 0 : c.tips;
+    const effectiveTips = effectLevel/2;
+    const effectOffsetMm = effectiveTips*c.tipMm;
+
+    ids('tips').disabled = neutralEnglish;
+    ids('tipMm').disabled = neutralEnglish;
+    ids('tipsVal').textContent = `Efecto ${effectLevel.toFixed(0)} = ${fmt(effectiveTips,1)} punta${effectiveTips===1?'':'s'} = ${fmt(effectOffsetMm,1)} mm`;
+    ids('tipMmVal').textContent = `${fmt(c.tipMm,1)} mm`;
+    ids('firstBallLabel').textContent = c.mode === 'ballFirst' ? 'Primera bola' : 'Bola objetivo después de bandas';
+
+    const firstBall = c.firstBall, otherBall = firstBall === 'yellow' ? 'red' : 'yellow';
+    let start, target, cueLine=null, objectInfo=null;
+    if(c.mode === 'ballFirst'){
+      start={...balls[firstBall]};
+      target={...balls[otherBall]};
+      cueLine={from:{...balls.white}, to:{...balls[firstBall]}};
+    } else {
+      start={...balls.white};
+      target={...balls[firstBall]};
+    }
+
+    const forcedSeq = buildForcedSeq(c);
+    const strictLkl = isStrictLklSequence(c);
+    const path = (c.systemMode === 'clc' || c.systemMode === 'long' || c.systemMode === 'plus' || strictLkl)
+      ? forcedMirrorPath(start,target,forcedSeq)
+      : choosePath(start,target,c);
+    const rawAttack = path.attack;
+    const attackRawCoord = rawAttack ? railCoord(rawAttack,c.rail1) : NaN;
+
+    const model = c.systemMode === 'clc'
+      ? clcCorrectionModel(c,path,start,target,rawAttack,effectLevel,effectiveTips)
+      : (c.systemMode === 'long'
+        ? longTourCorrectionModel(c,path,start,target,rawAttack,effectLevel,effectiveTips)
+        : (c.systemMode === 'plus'
+          ? plusCorrectionModel(c,path,start,target,rawAttack,effectLevel,effectiveTips)
+          : conservativePremiumModel(c,path,start,target,rawAttack,effectLevel,effectiveTips)));
+    const anchor = (c.systemMode === 'clc' || c.systemMode === 'long' || c.systemMode === 'plus') ? null : standardBreakAnchor(c, path, rawAttack, model.total);
+    model.anchor = anchor;
+    const correctionPoints = model.total + (anchor ? anchor.delta : 0);
+    const attackCorrected = shiftAttack(rawAttack,c.rail1,correctionPoints);
+    const attackCorrCoord = attackCorrected ? railCoord(attackCorrected,c.rail1) : NaN;
+    const salida = railCoord(start,c.rail1), llegada = salida - attackCorrCoord;
+
+    if(c.mode === 'ballFirst' && rawAttack){
+      const incoming = norm(sub(balls[firstBall],balls.white));
+      const outgoing = norm(sub(rawAttack,balls[firstBall]));
+      const ang = signedAngle(incoming,outgoing)*180/Math.PI;
+      objectInfo = {angle:ang, cut:classifyCut(ang), side:ang>=0?'hacia la izquierda de la línea de entrada':'hacia la derecha de la línea de entrada'};
+    }
+
+    const visualPath = (c.systemMode === 'clc' || c.systemMode === 'long' || c.systemMode === 'plus' || strictLkl)
+      ? forcedVisualPathFromAttack(start, target, path.seq, attackCorrected)
+      : visualPathFromAttack(start, target, path.seq, attackCorrected);
+    const sequenceWarning = strictLkl ? sequenceCompatibilityWarning(start, path.seq, attackCorrected) : null;
+    const shot = {c,path,displayPoints:(visualPath && visualPath.points) ? visualPath.points : path.points, visualPath, sequenceWarning, rawAttack,attackCorrected,attackRawCoord,attackCorrCoord,salida,llegada,correctionPoints,model,effectOffsetMm,effectiveTips,effectLevel,cueLine,objectInfo,start,target,firstBall,otherBall};
+    currentShot = shot;
+    updateDiagnostic(shot);
+    updatePositionInputs();
+    return shot;
+  }
+
+  function updateDiagnostic(s){
+    const anchorText = s.model.anchor
+      ? `<br>Tiro ancla activo: <b>${s.model.anchor.name}</b>, ataque patrón <span class="mono">${fmt(s.model.anchor.targetAttack,1)}</span>, peso <span class="mono">${fmt(s.model.anchor.weight,2)}</span>, ajuste <span class="mono">${fmt(s.model.anchor.delta,2)}</span> puntos LKL.`
+      : '';
+    const modeText = s.c.systemMode === 'clc'
+      ? 'Módulo corta-larga-corta, secuencia forzada'
+      : (s.c.systemMode === 'long'
+        ? 'Módulo Vueltas largas, hasta seis bandas'
+        : (s.c.systemMode === 'plus'
+          ? 'Módulo Plus, primera banda corta'
+          : 'Modelo LKL conservador'));
+    const plusAnchorText = s.c.systemMode === 'plus' && s.model.anchorPoints
+      ? `, ancla Plus <span class="mono">${fmt(s.model.anchorPoints,2)}</span>`
+      : '';
+    const pathText = !s.path.valid
+      ? `<br><span class="warn">Advertencia geométrica: ${s.path.mismatches.join('; ')}.</span>`
+      : '';
+    ids('diagnostic').innerHTML =
+      `<b>${s.model.diagnosticText}</b><br>` +
+      `${modeText}: <span class="mono">${fmt(s.model.total,2)}</span> puntos LKL ` +
+      `(familia/ángulo <span class="mono">${fmt(s.model.familyPoints,2)}</span>, efecto <span class="mono">${fmt(s.model.effectPoints,2)}</span>, golpe <span class="mono">${fmt(s.model.strokePoints,2)}</span>${plusAnchorText}).` +
+      anchorText + pathText;
+  }
+
+  function draw(){ drawTable(); const shot=computeShot(); drawPath(shot); drawBalls(); }
+  function drawTable(){
+    ctx.clearRect(0,0,geom.w,geom.h);
+    const x=geom.ox, y=geom.oy, w=TABLE.W*geom.scale, h=TABLE.H*geom.scale, rail=Math.max(16,geom.scale*2.7);
+    ctx.save(); ctx.shadowColor='rgba(0,0,0,.5)'; ctx.shadowBlur=28; ctx.shadowOffsetY=14;
+    roundRect(ctx,x-rail,y-rail,w+rail*2,h+rail*2,22); ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--rail').trim(); ctx.fill();
+    ctx.shadowBlur=0; ctx.shadowOffsetY=0; roundRect(ctx,x,y,w,h,13); ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--felt').trim(); ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,.18)'; ctx.lineWidth=1; ctx.stroke(); drawDiamonds(x,y,w,h,rail); drawReferenceLines(); drawStartMarks(); ctx.restore();
+  }
+  function drawDiamonds(x,y,w,h,rail){
+    ctx.save(); ctx.fillStyle='#f4d28b'; ctx.strokeStyle='rgba(0,0,0,.45)'; ctx.lineWidth=1; const r=Math.max(2.5,geom.scale*.32);
+    for(let i=0;i<=8;i++){const px=x+w*i/8; diamond(px,y-rail*.48,r); diamond(px,y+h+rail*.48,r)}
+    for(let i=0;i<=4;i++){const py=y+h*i/4; diamond(x-rail*.48,py,r); diamond(x+w+rail*.48,py,r)}
+    ctx.fillStyle='rgba(244,210,139,.78)'; ctx.font=`${Math.max(9,geom.scale*1.05)}px ui-monospace, monospace`; ctx.textAlign='center'; ctx.textBaseline='middle';
+    for(let n=0;n<=80;n+=10){const px=x+w*(n/80); ctx.fillText(String(n),px,y-rail*.78); ctx.fillText(String(n),px,y+h+rail*.78)}
+    for(let n=0;n<=40;n+=10){const py=y+h*(n/40); ctx.fillText(String(n),x-rail*.78,py); ctx.fillText(String(n),x+w+rail*.78,py)}
+    ctx.restore();
+  }
+  
+  function drawReferenceLines(){
+    if(ids('showMarks').value === 'hide') return;
+    ctx.save();
+
+    // Líneas principales de diamante a diamante.
+    ctx.setLineDash([Math.max(3,geom.scale*.22), Math.max(5,geom.scale*.38)]);
+    ctx.lineWidth = Math.max(.8, geom.scale*.05);
+    ctx.strokeStyle = 'rgba(255,255,255,.11)';
+
+    // Verticales: 10 a 70 en las bandas largas.
+    for(let xv=10; xv<=70; xv+=10){
+      const a = worldToScreen({x:xv,y:0});
+      const b = worldToScreen({x:xv,y:40});
+      ctx.beginPath();
+      ctx.moveTo(a.x,a.y);
+      ctx.lineTo(b.x,b.y);
+      ctx.stroke();
+    }
+
+    // Horizontales: 10, 20 y 30 entre bandas cortas.
+    for(let yh=10; yh<=30; yh+=10){
+      const a = worldToScreen({x:0,y:yh});
+      const b = worldToScreen({x:80,y:yh});
+      ctx.beginPath();
+      ctx.moveTo(a.x,a.y);
+      ctx.lineTo(b.x,b.y);
+      ctx.stroke();
+    }
+
+    // Tres líneas horizontales adicionales, pasando por las marcas guía centrales del paño.
+    // Se dibujan con el mismo estilo visible de las otras líneas de referencia.
+    ctx.setLineDash([Math.max(3,geom.scale*.22), Math.max(5,geom.scale*.38)]);
+    ctx.lineWidth = Math.max(.8, geom.scale*.05);
+    ctx.strokeStyle = 'rgba(255,255,255,.11)';
+    for(const yh of [14.788732, 20.000000, 25.211268]){
+      const a = worldToScreen({x:0,y:yh});
+      const b = worldToScreen({x:80,y:yh});
+      ctx.beginPath();
+      ctx.moveTo(a.x,a.y);
+      ctx.lineTo(b.x,b.y);
+      ctx.stroke();
+    }
+
+    ctx.setLineDash([]);
+    ctx.restore();
+  }
+
+function drawStartMarks(){
+    if(ids('showMarks').value === 'hide') return;
+    ctx.save(); const r=Math.max(2.8,geom.scale*.30); ctx.fillStyle='rgba(255,255,255,.74)'; ctx.strokeStyle='rgba(0,0,0,.18)'; ctx.lineWidth=1;
+    for(const m of START_MARKS){const p=worldToScreen(m); ctx.beginPath(); ctx.arc(p.x,p.y,r,0,Math.PI*2); ctx.fill(); ctx.stroke()}
+    ctx.restore();
+  }
+  function diamond(x,y,r){ctx.beginPath(); ctx.moveTo(x,y-r); ctx.lineTo(x+r,y); ctx.lineTo(x,y+r); ctx.lineTo(x-r,y); ctx.closePath(); ctx.fill(); ctx.stroke()}
+  function drawPath(s){
+    if(!s || !s.path || s.path.points.length<2) return; ctx.save();
+    if(s.cueLine){const a=worldToScreen(s.cueLine.from), b=worldToScreen(s.cueLine.to); ctx.setLineDash([7,7]); ctx.strokeStyle='rgba(255,255,255,.55)'; ctx.lineWidth=2.2; ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke(); ctx.setLineDash([])}
+    ctx.strokeStyle='#62d7ff'; ctx.lineWidth=3.5; ctx.lineJoin='round'; ctx.lineCap='round'; ctx.shadowColor='rgba(98,215,255,.35)'; ctx.shadowBlur=12; ctx.beginPath();
+    (s.displayPoints || s.path.points).forEach((p,i)=>{const q=worldToScreen(p); if(i===0) ctx.moveTo(q.x,q.y); else ctx.lineTo(q.x,q.y)}); ctx.stroke(); ctx.shadowBlur=0;
+    if(s.rawAttack){const q=worldToScreen(s.rawAttack); ctx.fillStyle='#62d7ff'; ctx.globalAlpha=.7; ctx.beginPath(); ctx.arc(q.x,q.y,5,0,Math.PI*2); ctx.fill(); ctx.globalAlpha=1}
+    if(s.attackCorrected){
+      const q=worldToScreen(s.attackCorrected);
+      const r=Math.max(14, geom.scale*.82);
+      const arm=Math.max(18, geom.scale*1.08);
+
+      // Halo oscuro exterior para que la mira no se confunda con la trayectoria azul.
+      ctx.shadowBlur=0;
+      ctx.strokeStyle='rgba(0,0,0,.78)';
+      ctx.fillStyle='rgba(0,0,0,.20)';
+      ctx.lineWidth=7;
+      ctx.beginPath();
+      ctx.arc(q.x,q.y,r,0,Math.PI*2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(q.x-arm,q.y); ctx.lineTo(q.x+arm,q.y);
+      ctx.moveTo(q.x,q.y-arm); ctx.lineTo(q.x,q.y+arm);
+      ctx.stroke();
+
+      // Mira principal: amarillo neón.
+      ctx.strokeStyle='#fff200';
+      ctx.fillStyle='rgba(255,242,0,.30)';
+      ctx.lineWidth=4;
+      ctx.shadowColor='rgba(255,242,0,.85)';
+      ctx.shadowBlur=18;
+      ctx.beginPath();
+      ctx.arc(q.x,q.y,r,0,Math.PI*2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(q.x-arm,q.y); ctx.lineTo(q.x+arm,q.y);
+      ctx.moveTo(q.x,q.y-arm); ctx.lineTo(q.x,q.y+arm);
+      ctx.stroke();
+      ctx.shadowBlur=0;
+
+      // Punto central pequeño para reforzar el objetivo exacto.
+      ctx.fillStyle='#fff200';
+      ctx.beginPath();
+      ctx.arc(q.x,q.y,Math.max(3, geom.scale*.18),0,Math.PI*2);
+      ctx.fill();
+
+      drawAttackLabel(q, `Ataque ${fmt(s.attackCorrCoord,1)}`);
+    }
+    ctx.restore();
+  }
+
+  function drawAttackLabel(q, label){
+    ctx.save();
+
+    const fontSize = Math.max(27, geom.scale*2.925);
+    ctx.font = `800 ${fontSize}px ui-sans-serif, system-ui`;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+
+    const metrics = ctx.measureText(label);
+    const textW = metrics.width;
+    const textH = fontSize * 1.15;
+
+    // Límites del paño azul claro. El letrero no debe invadir las bandas
+    // ni tapar la numeración de los diamantes.
+    const feltLeft = geom.ox;
+    const feltTop = geom.oy;
+    const feltRight = geom.ox + TABLE.W * geom.scale;
+    const feltBottom = geom.oy + TABLE.H * geom.scale;
+    const margin = Math.max(10, geom.scale * 0.70);
+
+    // Posición preferida: cerca de la mira, pero dentro del paño.
+    let x = q.x + Math.max(14, geom.scale * .85);
+    let y = q.y - Math.max(12, geom.scale * .70);
+
+    // Si no cabe a la derecha de la mira, se mueve a la izquierda.
+    if(x + textW > feltRight - margin){
+      x = q.x - textW - Math.max(16, geom.scale * .95);
+    }
+
+    // Encerrar estrictamente dentro del paño.
+    x = clamp(x, feltLeft + margin, feltRight - margin - textW);
+    y = clamp(y, feltTop + margin + textH/2, feltBottom - margin - textH/2);
+
+    // Contorno negro más fino para no dificultar la lectura.
+    ctx.lineWidth = Math.max(2.2, fontSize * .075);
+    ctx.strokeStyle = 'rgba(0,0,0,.72)';
+    ctx.fillStyle = '#ffffff';
+
+    ctx.strokeText(label, x, y);
+    ctx.fillText(label, x, y);
+
+    ctx.restore();
+  }
+
+  function drawBalls(){
+    for(const key of ['white','yellow','red']){
+      const p = worldToScreen(balls[key]);
+      const r = BALL_R * geom.scale;
+
+      ctx.save();
+
+      // En la lupa, la bola que se está moviendo queda al 20% de opacidad
+      // para permitir ver las marcas y detalles que hay debajo.
+      if(loupeRenderMode && key === dragKey){
+        ctx.globalAlpha = .2;
+      }
+
+      // Bolas sólidas, sin reflejo, brillo ni gradiente.
+      ctx.fillStyle = colors[key];
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Borde discreto para separarlas del paño sin simular reflejos.
+      ctx.strokeStyle = 'rgba(0,0,0,.58)';
+      ctx.lineWidth = Math.max(1.2, geom.scale * .08);
+      ctx.stroke();
+
+      // Letra central sencilla.
+      ctx.fillStyle = key === 'white' ? '#2b2b2b' : '#ffffff';
+      ctx.font = `700 ${Math.max(9, r*.65)}px ui-sans-serif, system-ui`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(key === 'white' ? 'B' : (key === 'yellow' ? 'A' : 'R'), p.x, p.y);
+
+      ctx.restore();
+    }
+  }
+  function roundRect(ctx,x,y,w,h,r){ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath()}
+
+  function showLoupe(clientX, clientY){
+    if(!dragKey) return;
+    const rect = canvas.getBoundingClientRect();
+    const wrapRect = canvas.parentElement.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+    const cssSize = Math.min(264, Math.max(165, wrapRect.width * 0.285));
+
+    // En iPad, el dedo y la mano tapan el sitio de colocación.
+    // Por eso la lupa no queda al lado del dedo, sino en la esquina opuesta
+    // del área de la mesa. Así se mantiene lejos del punto que se está señalando.
+    const pointerX = clientX - wrapRect.left;
+    const pointerY = clientY - wrapRect.top;
+    const margin = 14;
+    let left = pointerX > wrapRect.width / 2
+      ? margin
+      : wrapRect.width - cssSize - margin;
+    let top = pointerY > wrapRect.height / 2
+      ? margin
+      : wrapRect.height - cssSize - margin;
+
+    left = clamp(left, margin, Math.max(margin, wrapRect.width - cssSize - margin));
+    top = clamp(top, margin, Math.max(margin, wrapRect.height - cssSize - margin));
+    loupe.style.width = `${cssSize}px`;
+    loupe.style.height = `${cssSize}px`;
+    loupe.style.left = `${left}px`;
+    loupe.style.top = `${top}px`;
+    loupe.style.display = 'block';
+
+    const dpr = window.devicePixelRatio || 1;
+    const targetPx = Math.round(cssSize * dpr);
+    if(loupe.width !== targetPx || loupe.height !== targetPx){
+      loupe.width = targetPx;
+      loupe.height = targetPx;
+    }
+    // Render temporal para la lupa: la bola arrastrada se dibuja al 50% de opacidad,
+    // de modo que se vean debajo las marcas del paño y otros detalles.
+    loupeRenderMode = true;
+    draw();
+
+    lctx.setTransform(1,0,0,1,0,0);
+    lctx.clearRect(0,0,loupe.width,loupe.height);
+    lctx.imageSmoothingEnabled = true;
+    lctx.imageSmoothingQuality = 'high';
+
+    const zoom = 4.0;
+    const srcW = loupe.width / zoom;
+    const srcH = loupe.height / zoom;
+    const sx = clamp(x*dpr - srcW/2, 0, Math.max(0, canvas.width - srcW));
+    const sy = clamp(y*dpr - srcH/2, 0, Math.max(0, canvas.height - srcH));
+    lctx.drawImage(canvas, sx, sy, srcW, srcH, 0, 0, loupe.width, loupe.height);
+
+    loupeRenderMode = false;
+    draw();
+
+    const cx = loupe.width/2, cy = loupe.height/2;
+    lctx.save();
+    lctx.strokeStyle = 'rgba(255,255,255,.92)';
+    lctx.lineWidth = Math.max(2, 2*dpr);
+    lctx.beginPath();
+    lctx.moveTo(cx - 28*dpr, cy); lctx.lineTo(cx + 28*dpr, cy);
+    lctx.moveTo(cx, cy - 28*dpr); lctx.lineTo(cx, cy + 28*dpr);
+    lctx.stroke();
+    lctx.strokeStyle = 'rgba(0,0,0,.62)';
+    lctx.lineWidth = Math.max(1, 1*dpr);
+    lctx.beginPath();
+    lctx.arc(cx, cy, 12*dpr, 0, Math.PI*2);
+    lctx.stroke();
+    lctx.restore();
+  }
+  function hideLoupe(){ loupe.style.display = 'none'; }
+
+  function onPointerDown(e){
+    const rect=canvas.getBoundingClientRect();
+    const p=screenToWorld(e.clientX-rect.left,e.clientY-rect.top);
+    let best=null;
+    for(const key of Object.keys(balls)){
+      const d=dist(p,balls[key]);
+      if(d<BALL_R*2.2 && (!best||d<best.d)) best={key,d};
+    }
+    if(best){
+      dragKey=best.key;
+      canvas.setPointerCapture(e.pointerId);
+      draw();
+      showLoupe(e.clientX,e.clientY);
+    }
+  }
+  function onPointerMove(e){
+    if(!dragKey) return;
+    const rect=canvas.getBoundingClientRect();
+    const p=screenToWorld(e.clientX-rect.left,e.clientY-rect.top);
+    balls[dragKey].x=clamp(p.x,BALL_R,TABLE.W-BALL_R);
+    balls[dragKey].y=clamp(p.y,BALL_R,TABLE.H-BALL_R);
+    updatePositionInputs();
+    draw();
+    showLoupe(e.clientX,e.clientY);
+  }
+  function onPointerUp(e){
+    dragKey=null;
+    hideLoupe();
+    try{canvas.releasePointerCapture(e.pointerId)}catch{}
+  }
+
+  canvas.addEventListener('pointerdown',onPointerDown);
+  canvas.addEventListener('pointermove',onPointerMove);
+  canvas.addEventListener('pointerup',onPointerUp);
+  canvas.addEventListener('pointercancel',onPointerUp);
+
+  function setupPositionInputHandlers(){
+    for(const key of ['white','yellow','red']){
+      for(const axis of ['Long','Short']){
+        const input = ids(`${key}${axis}Cm`);
+
+        input.addEventListener('focus', () => {
+          setTimeout(() => input.select(), 0);
+        });
+
+        // En iPad y PC, la bola se mueve mientras se escribe el valor.
+        // updatePositionInputs no sobrescribe el campo activo, así que la digitación no se interrumpe.
+        input.addEventListener('input', () => {
+          updateBallFromCmInputs(key);
+        });
+
+        input.addEventListener('keydown', (e) => {
+          if(e.key === 'Enter'){
+            e.preventDefault();
+            updateBallFromCmInputs(key);
+            input.blur();
+          }
+        });
+
+        input.addEventListener('change', () => updateBallFromCmInputs(key));
+        input.addEventListener('blur', () => {
+          updateBallFromCmInputs(key);
+          updatePositionInputs();
+        });
+      }
+
+      // Cambiar la banda de referencia no mueve la bola: solo recalcula la distancia mostrada.
+      ids(`${key}LongRef`).addEventListener('change', () => { updatePositionInputs(); draw(); });
+      ids(`${key}ShortRef`).addEventListener('change', () => { updatePositionInputs(); draw(); });
+    }
+  }
+
+  setupPositionInputHandlers();
+
+  document.querySelectorAll('select,input').forEach(el=>{
+    if(el.classList.contains('posCm') || el.classList.contains('posRef')) return;
+    el.addEventListener('input',draw);
+  });
+
+  ids('systemMode').addEventListener('change', () => {
+    const c = controls();
+    if(c.systemMode === 'clc') enforceClcControls(c);
+    if(c.systemMode === 'long') enforceLongTourControls(c);
+    if(c.systemMode === 'plus') enforcePlusControls(c);
+    updateSystemModeUi(c);
+    draw();
+  });
+  ids('recalc').addEventListener('click',draw);
+  ids('reset').addEventListener('click',()=>{
+    balls=JSON.parse(JSON.stringify(initialBalls));
+    updatePositionInputs();
+    draw();
+  });
+
+  resize();
+})();
+</script>
+</body>
+</html>
